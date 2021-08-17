@@ -1,0 +1,293 @@
+---
+title: "Analysis-music-hum"
+author: "Noah Love"
+date: "8/16/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(spotifyr)
+library(tidyverse)
+library(knitr)
+library(lubridate)
+library(tidyverse)
+
+```
+
+## R Markdown
+
+Hello this is a test
+
+```{r}
+
+my_id <- 
+
+Sys.setenv(SPOTIFY_CLIENT_ID = )
+Sys.setenv(SPOTIFY_CLIENT_SECRET = )
+
+access_token <- get_spotify_access_token()
+```
+
+
+```{r}
+desert_island <- get_playlist(
+    playlist_id = "63HV8Y11tj4Yq8vj8TYpLm",
+    authorization = access_token
+)
+```
+
+```{r}
+tracks <- desert_island$tracks
+```
+
+```{r find track ids, echo=FALSE, message=FALSE, warning=FALSE}
+larger_frame <- desert_island[13]
+
+test <- larger_frame[1]$tracks
+
+df <- test$items
+
+tracks <- df$track.id
+
+tracksMatrix <- as.matrix(tracks)
+```
+
+```{r get song information, message=FALSE, warning=FALSE}
+more_info_list <- larger_frame$tracks
+
+more_info <- as_tibble(more_info_list$items)
+
+larger_frame_important <- more_info %>% 
+    select(track.id, track.artists, track.duration_ms, track.explicit, track.name, track.album.name, track.album.release_date, track.popularity)
+
+larger_frame_important
+
+
+```
+
+
+
+```{r message=FALSE, warning=FALSE}
+
+track_features <- get_track_audio_features("7t86fVeDAd63ThaR0ZkxXS")
+
+
+track_features2 <- get_track_audio_analysis("79MMMdYL00iwKVHBSAUkLY")
+track_features2
+
+#full_join(track_features, track_features2)
+
+i <- 0
+
+datalist  <- list()
+
+for(i in 1:length(tracks)){
+    track_individuals <- get_track_audio_features(tracks[i])
+    
+    track_individuals$i #which iteration
+    
+    datalist[[i]] <- track_individuals
+    
+}
+
+
+
+spotify_data_half = do.call(rbind, datalist)
+
+
+```
+
+```{r}
+spotify_data_half
+# rename the song characteristics column to match larger set
+spotify_data_half <- spotify_data_half %>% 
+    relocate(id) %>% 
+    dplyr::rename(track.id = id)
+```
+
+```{r}
+#merge the two smaller sets
+
+spotify_data <- full_join(spotify_data_half, larger_frame_important, by = "track.id")
+
+```
+
+```{r message=FALSE, warning=FALSE}
+#initialize
+
+spotify_data <- spotify_data %>% 
+     add_column(artists = "NAME")
+
+spotify_data
+
+
+```
+
+
+
+```{r make artists tibble, message=FALSE, warning=FALSE}
+i <- 0
+
+#convert artist embedded data table into only first artist char
+
+for(i in 1:length(spotify_data$track.artists)){
+    # create tibble of artist and song id
+    
+    single_artist <- as.data.frame(spotify_data$track.artists[i])
+    single_artist <- as.tibble(single_artist)
+    
+    single_artist_name <- single_artist$name
+
+    spotify_data$artists[i] <- single_artist_name
+}
+
+```
+
+```{r add artists in and clean data frame}
+
+spotify_data <- spotify_data %>% 
+    select(-type, -uri, -track_href, -analysis_url, -track.artists) %>% 
+    relocate(track.name)
+    
+```
+
+
+
+
+
+```{r}
+
+# https://www.kaggle.com/cihanoklap/top-songs-on-spotify-what-makes-them-popular
+top_artists <- spotify_data %>%
+    group_by(artists)  %>%
+    dplyr::summarise(n_apperance = n()) %>%
+    filter(n_apperance > 3) %>%
+    arrange(desc(n_apperance))
+
+top_artists$artists <- factor(top_artists$artists, levels = top_artists$artists[order(top_artists$n_apperance)]) # in order to visualise the list in descending order 
+
+ggplot(top_artists, aes(x = artists, y = n_apperance)) +
+    geom_bar(stat = "identity",  fill = "tomato2", width = 0.6 ) + 
+    labs(title = "Top Artists on our desert island", x = "Artists", y = "Number of apperances on the desert playlist") +
+    theme(plot.title = element_text(size=15,hjust=-.3,face = "bold"), axis.title = element_text(size=12)) +
+    geom_text(aes(label=n_apperance), hjust = 2, size = 3, color = 'white') +
+    coord_flip()
+```
+
+
+
+```{r}
+library(corrplot)
+
+spotify_data
+
+spotify_data_num <- spotify_data[,-c((1:2),(17:19),(21))] 
+ 
+spotify_data_num
+
+mtCor <- cor(spotify_data_num)
+corrplot(mtCor, method = "ellipse", type = "upper", tl.srt = 45)
+
+```
+
+Energy and loudness is strongly correlated. Acousticness and instrumentalness are strongly negatively correlated with energy and loudness. 
+
+Interestingly, popularity (to all spotify listeners) is not very correlated with anything except loudness, and negatively to acousticness. It appears we like large, grand sounds. 
+
+```{r}
+
+# https://www.kaggle.com/cihanoklap/top-songs-on-spotify-what-makes-them-popular
+
+spotify_data$key <- as.character(spotify_data$key)
+spotify_data$key <- plyr::revalue(spotify_data$key, c("0" = "C", "1" = "C♯,D♭", "2" = "D", "3" = "D♯,E♭", "4" = "E", "5" =  "F", "6" = "F♯,G♭","7" = "G","8" = "G♯,A♭","9" = "A","10" = "A♯,B♭","11" = "B"))
+
+song_keys <- spotify_data %>%
+    dplyr::group_by(key) %>%
+    dplyr::summarise(n_key = n()) %>%
+    arrange(desc(n_key))
+
+song_keys$key <- factor(song_keys$key, levels = song_keys$key[order(song_keys$n_key)]) # in order to visualise the keys in descending order
+
+ggplot(song_keys, aes(x = reorder(key,-n_key), y = n_key, fill = reorder(key,-n_key))) +
+    geom_bar(stat = "identity") +
+    labs(title = "Distribution of the Keys of Top Songs", x = "Keys", y = "Count of Keys on the Top 100") +
+    geom_text(aes(label=n_key), position = position_stack(vjust = 0.8)) +
+    theme_bw() +
+    theme(plot.title = element_text(size=15,face = "bold"), axis.title = element_text(size=12)) +
+    theme(legend.position="none")
+```
+
+
+
+```{r}
+
+# https://www.kaggle.com/cihanoklap/top-songs-on-spotify-what-makes-them-popular
+correlated_density <- ggplot(spotify_data) +
+    geom_density(aes(energy, fill ="energy", alpha = 0.1)) + 
+    geom_density(aes(valence, fill ="valence", alpha = 0.1)) + 
+    geom_density(aes(danceability, fill ="danceability", alpha = 0.1)) + 
+    scale_x_continuous(name = "Energy, Valence and Danceability") +
+    scale_y_continuous(name = "Density") +
+    ggtitle("Density plot of Energy, Valence and Danceability") +
+    theme_bw() +
+    theme(plot.title = element_text(size = 14, face = "bold"),
+          text = element_text(size = 12)) +
+    theme(legend.title=element_blank()) +
+    scale_fill_brewer(palette="Accent")
+
+correlated_density
+```
+
+
+
+```{r}
+
+# https://www.kaggle.com/cihanoklap/top-songs-on-spotify-what-makes-them-popular
+
+
+loudness_density <- ggplot(spotify_data) +
+    geom_density(aes(loudness, fill ="loudness")) + 
+    scale_x_continuous(name = "Loudness") +
+    scale_y_continuous(name = "Density") +
+    ggtitle("Density plot of Loudness") +
+    theme_bw() +
+    theme(plot.title = element_text(size = 14, face = "bold"),
+            text = element_text(size = 12)) +
+    theme(legend.title=element_blank()) +
+    scale_fill_brewer(palette="Paired")
+
+print(loudness_density)
+```
+
+```{r}
+
+df <- spotify_data %>%
+  select(popularity, valence, speechiness, tempo, artists, Genre) %>%
+  group_by(Popularity)%>%
+  filter(!is.na(Popularity)) %>%
+  filter(!is.na(Valence.))%>%
+  filter(!is.na(Speechiness.))%>%
+  filter(!is.na(Beats.Per.Minute))%>%
+  filter(!is.na(Artist.Name))%>%
+  ggplot(mapping = aes(x = Valence., y = Popularity, size = Beats.Per.Minute, color = Genre))+
+  facet_wrap(~Artist.Name)+
+  geom_point()+
+  theme_minimal()
+
+spotify_data
+```
+
+
+
+Adagio – slowly with great expression[10] (66–76 bpm)
+Andante – at a walking pace (76–108 bpm)
+Moderato – at a moderate speed (108–120 bpm)
+Allegro – fast, quickly, and bright (120–156 bpm)
+Vivace – lively and fast (156–176 bpm)
+Presto – very, very fast (168–200 bpm)
+
+
+
+
