@@ -13,6 +13,8 @@ library(tidyverse)
 library(knitr)
 library(lubridate)
 library(tidyverse)
+library(corrplot)
+library(ggridges)
 
 ```
 
@@ -20,7 +22,7 @@ library(tidyverse)
 
 Hello this is a test
 
-```{r}
+```{r include=FALSE}
 
 my_id <- ''
 
@@ -82,7 +84,7 @@ for(i in 1:length(tracks)){
     datalist[[i]] <- track_individuals
 }
 
-spotify_data_half = do.call(rbind, datalist)
+spotify_data_half <- do.call(rbind, datalist)
 ```
 
 ```{r}
@@ -150,7 +152,7 @@ ggplot(top_artists, aes(x = artists, y = n_apperance)) +
 
 
 ```{r}
-library(corrplot)
+
 
 spotify_data
 
@@ -240,6 +242,180 @@ Allegro – fast, quickly, and bright (120–156 bpm)
 Vivace – lively and fast (156–176 bpm)
 Presto – very, very fast (168–200 bpm)
 
+
+
+```{r}
+joy <- get_artist_audio_features('Hector Berlioz')
+joy
+```
+
+```{r}
+# Symphonie fantastique, Op. 14, H. 48: I. Rêveries - Passions	
+# Symphonie fantastique, Op. 14, H. 48: II. Un bal	
+# Symphonie fantastique, Op. 14, H. 48: III. Scène aux champs	
+# Symphonie fantastique, Op. 14, H. 48: IV. Marche au supplice	
+# Symphonie fantastique, Op. 14, H. 48: V. Songe d'une nuit de sabbat
+
+berlioz <- joy %>% 
+  filter(album_release_date == "2021-07-23")
+
+berlioz
+
+berlioz %>% 
+    arrange(-valence) %>% 
+    select(.data$track_name, .data$valence) %>% 
+    head(5) %>% 
+    kable()
+
+berlioz %>% 
+    arrange(-loudness) %>% 
+    select(.data$track_name, .data$valence) %>% 
+    head(5) %>% 
+    kable()
+
+berlioz %>% 
+    arrange(-liveness) %>% 
+    select(.data$track_name, .data$valence) %>% 
+    head(5) %>% 
+    kable()
+
+berlioz %>% 
+    arrange(-liveness) %>% 
+    select(.data$track_name, .data$valence) %>% 
+    head(5) %>% 
+    kable()
+
+berlioz %>% 
+    arrange(-danceability) %>% 
+    select(.data$track_name, .data$valence) %>% 
+    head(5) %>% 
+    kable()
+
+```
+
+
+
+
+
+```{r}
+ggplot(berlioz, aes(x = energy,y=fct_rev(track_name))) + 
+  geom_density_ridges(scale = 2, size = 0.1, rel_min_height = 0.03,quantile_lines=TRUE,quantiles=2) +
+  theme_ridges()+
+  scale_x_continuous( expand = c(0, 0)) +
+  labs(title= "Foo Fighters energy by album",subtitle = "Based on data from Spotify", y="Album", x = "Energy")
+```
+
+```{r}
+ggplot(
+    berlioz, 
+    aes(x = liveness, y = track_name)
+    ) + 
+geom_density_ridges() + 
+theme_ridges() +
+labs(title = "Joyplot of Joy Division's joy distributions")
+```
+
+## What makes a master 
+
+```{r}
+masterpieces <- get_playlist(
+    playlist_id = "46l09Vietu0U65GEyyWH1g",
+    authorization = access_token
+)
+
+tracks_masterpieces <- masterpieces$tracks
+
+larger_frame_masterpieces <- masterpieces[13]
+test_masterpieces <- larger_frame_masterpieces[1]$tracks
+df_masterpieces <- test_masterpieces$items
+
+tracks_masterpieces <- df_masterpieces$track.id
+
+tracksMatrix_masterpieces <- as.matrix(tracks_masterpieces)
+
+more_info_list_masterpieces <- larger_frame_masterpieces$tracks
+
+more_info_masterpieces <- as_tibble(more_info_list_masterpieces$items)
+
+larger_frame_important_masterpieces <- more_info_masterpieces %>% 
+    select(track.id, track.artists, track.duration_ms, track.explicit, track.name, track.album.name, track.album.release_date, track.popularity)
+
+larger_frame_important_masterpieces
+```
+
+
+
+```{r message=FALSE, warning=FALSE}
+track_features_masterpieces <- get_track_audio_features("4yg4OeZxDSqyXx6NUxtxHR")
+
+i <- 0
+datalist_masterpieces  <- list()
+
+for(i in 1:length(tracks_masterpieces)){
+    track_individuals_masterpieces <- get_track_audio_features(tracks_masterpieces[i])
+    
+    track_individuals_masterpieces$i #which iteration
+    
+    datalist_masterpieces[[i]] <- track_individuals_masterpieces
+}
+
+spotify_data_half_masterpieces <- do.call(rbind, datalist_masterpieces)
+
+
+# rename the song characteristics column to match larger set
+spotify_data_half_masterpieces <- spotify_data_half_masterpieces %>% 
+    relocate(id) %>% 
+    dplyr::rename(track.id = id)
+
+#merge the two smaller sets
+spotify_data_masterpieces <- full_join(spotify_data_half_masterpieces, larger_frame_important_masterpieces, by = "track.id")
+
+```
+
+
+```{r make artists tibble, message=FALSE, warning=FALSE}
+# initialize artists column
+spotify_data_masterpieces <- spotify_data_masterpieces %>% 
+     add_column(artists = "NAME")
+
+i <- 0
+#convert artist embedded data table into only first artist char
+for(i in 1:length(spotify_data_masterpieces$track.artists)){
+    
+    # create tibble of artist and song id
+    single_artist_masterpieces <- as.data.frame(spotify_data_masterpieces$track.artists[i])
+    single_artist_masterpieces <- as.tibble(single_artist_masterpieces)
+    
+    single_artist_name_masterpieces <- single_artist_masterpieces$name
+
+    spotify_data_masterpieces$artists[i] <- single_artist_name_masterpieces
+}
+
+spotify_data_masterpieces <- spotify_data_masterpieces %>% 
+    select(-type, -uri, -track_href, -analysis_url, -track.artists) %>% 
+    relocate(track.name)
+
+spotify_data_masterpieces
+    
+```
+
+
+
+```{r}
+multiple_masters <- spotify_data_masterpieces %>% 
+  group_by(artists) %>% 
+  filter(n()>1)
+
+ggplot(
+    multiple_masters, 
+    aes(x = valence, y = artists)
+    ) + 
+  geom_density_ridges_gradient(show.legend = FALSE) +
+geom_density_ridges() + 
+theme_ridges() +
+labs(title = "Valence across the 'masters'")
+
+```
 
 
 
