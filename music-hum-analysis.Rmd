@@ -285,48 +285,14 @@ correlated_density
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 joy <- get_artist_audio_features('Hector Berlioz')
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-# Symphonie fantastique, Op. 14, H. 48: I. Rêveries - Passions	
-# Symphonie fantastique, Op. 14, H. 48: II. Un bal	
-# Symphonie fantastique, Op. 14, H. 48: III. Scène aux champs	
-# Symphonie fantastique, Op. 14, H. 48: IV. Marche au supplice	
-# Symphonie fantastique, Op. 14, H. 48: V. Songe d'une nuit de sabbat
 
 berlioz <- joy %>% 
   filter(album_release_date == "2021-07-23")
 
 berlioz %>% 
-    arrange(-valence) %>% 
-    select(.data$track_name, .data$valence) %>% 
+    select(.data$track_name, .data$valence, danceability, loudness, liveness, energy, tempo) %>% 
     head(5) %>% 
     kable()
-
-berlioz %>% 
-    arrange(-loudness) %>% 
-    select(.data$track_name, .data$valence) %>% 
-    head(5) %>% 
-    kable()
-
-berlioz %>% 
-    arrange(-liveness) %>% 
-    select(.data$track_name, .data$valence) %>% 
-    head(5) %>% 
-    kable()
-
-berlioz %>% 
-    arrange(-liveness) %>% 
-    select(.data$track_name, .data$valence) %>% 
-    head(5) %>% 
-    kable()
-
-berlioz %>% 
-    arrange(-danceability) %>% 
-    select(.data$track_name, .data$valence) %>% 
-    head(5) %>% 
-    kable()
-
 ```
 
 
