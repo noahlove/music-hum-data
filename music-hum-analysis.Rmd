@@ -177,18 +177,28 @@ spotify_data$track.album.release_date <- as.Date(spotify_data$track.album.releas
 summary(spotify_data$track.album.release_date)
 ```
 
+Through the use of spotify's descriptors, we are able to look at how they interact together. Using a correlation plot on our desert island dataset, it appears very few things are closely related. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 spotify_data_num <- spotify_data[,-c((1:2),(17:19),(21))] 
- 
 
 mtCor <- cor(spotify_data_num)
 corrplot(mtCor, method = "ellipse", type = "upper", tl.srt = 45)
 
 ```
 
-Energy and loudness is strongly correlated. Acousticness and instrumentalness are strongly negatively correlated with energy and loudness. 
+Energy and loudness is strongly correlated. Acousticness and instrumentalness are strongly negatively correlated with energy and loudness. This seems reasonable as there is very infrequently really loud instrumental or acappella songs. 
+
+```{r}
+spotify_data %>% 
+  arrange(-acousticness) %>% 
+  select(track.name, acousticness) %>% 
+  head(4) %>% 
+  kable() 
+  
+```
+Particularly pulled out in this "acousticness" are piano pieces. At the top is Debussy in a rather slow and tender Prelude. 
 
 Interestingly, popularity (to all spotify listeners) is not very correlated with anything except loudness, and negatively to acousticness. It appears we like large, grand sounds. 
 
