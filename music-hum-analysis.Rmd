@@ -18,19 +18,6 @@ library(ggridges)
 
 ```
 
-## Introduction
-Throughout our semester in Masterpieces of Western Music, we studied a variety of pieces and composers, and yet haven't arrived at a definitive set of characteristics that compose an individual masterpiece. Further, we compiled our own personal favorite songs, a playlist fit for if Manhattan was set adrift into the ocean and Columbia students alone chose the music we must survive on. 
-
-### Spotify Data Analysis 
-Spotify music provides an incredible API that has a wealth of information related to each and every song in their repository. Spotify themselves do the hard work of data processing individual characteristics like time signature and qualitative descriptors like loudness, instrumentalness or acousticness. There are broadly speaking 3 categories of factors:
-
-- Mood: Danceability, Valence, Energy, Tempo
-- Properties: Loudness, Speechiness, Instrumentalness
-- Context: Liveness, Acousticness
-
-
-
-
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 
@@ -42,11 +29,42 @@ Sys.setenv(SPOTIFY_CLIENT_SECRET = '')
 access_token <- get_spotify_access_token()
 ```
 
-In our scenario, the easiest way to pull the characteristics is to use the individual playlist identifiers. 
+## Introduction
+Throughout our semester in Masterpieces of Western Music, we studied a variety of pieces and composers, and yet haven't arrived at a definitive set of characteristics that compose an individual masterpiece. Further, we compiled our own personal favorite songs, a playlist fit for if Manhattan was set adrift into the ocean and Columbia students alone chose the music we must survive on. 
 
-Columbia's desert playlist: 63HV8Y11tj4Yq8vj8TYpLm
+### Spotify Data Analysis 
+Spotify music provides an incredible API that has a wealth of information related to each and every song in their repository. Spotify themselves do the hard work of data processing individual characteristics like time signature and qualitative descriptors like loudness, instrumentalness or acousticness. There are broadly speaking 3 categories of factors:
 
-Our masterpieces: 46l09Vietu0U65GEyyWH1g
+- Mood: Danceability, Valence, Energy, Tempo
+- Properties: Loudness, Speechiness, Instrumentalness
+- Context: Liveness, Acousticness
+
+
+However, these characteristics aren't always as black and white as they mean seem. Having a number between 0 and 1 for each characteristic seems definitive, and yet they are not obvious. One inherent problem with larger works is the difficulty have having one number, an average, describe an entire movement. 
+
+For example, we can look at Hector Berlioz's Symphonie Fantastique
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+joy <- get_artist_audio_features('Hector Berlioz')
+
+berlioz <- joy %>% 
+  filter(album_release_date == "2021-07-23")
+
+berlioz %>% 
+    select(.data$track_name, .data$valence, danceability, loudness, liveness, energy, tempo) %>% 
+    head(5) %>% 
+    kable()
+
+```
+For example, the fourth movement, a quick and almost chaotic at times march is almost without liveliness but is listed as more dancable than the second movement, a ball. It shows some of the shortcomings of the analytics, especially as they relate to larger symphonic works. 
+
+
+
+
+In our scenario, the easiest way to pull the characteristics is to use the individual playlist identifiers. If this analysis wishes to be repeated, the playlists should be publicly availabe:
+
+- Columbia's desert playlist: 63HV8Y11tj4Yq8vj8TYpLm
+- Our masterpieces: 46l09Vietu0U65GEyyWH1g
 
 They can be easily called using:
 
@@ -278,22 +296,6 @@ correlated_density <- ggplot(spotify_data) +
 correlated_density
 ```
 
-
-
-
-
-
-```{r message=FALSE, warning=FALSE, include=FALSE}
-joy <- get_artist_audio_features('Hector Berlioz')
-
-berlioz <- joy %>% 
-  filter(album_release_date == "2021-07-23")
-
-berlioz %>% 
-    select(.data$track_name, .data$valence, danceability, loudness, liveness, energy, tempo) %>% 
-    head(5) %>% 
-    kable()
-```
 
 
 ## What makes a masterpiece
