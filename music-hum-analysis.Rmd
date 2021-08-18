@@ -150,7 +150,7 @@ head(spotify_data)
 glimpse(spotify_data)
 ```
 
-
+First, some simple exploration of our choices to fill our desert island with sound. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 # https://www.kaggle.com/cihanoklap/top-songs-on-spotify-what-makes-them-popular
@@ -164,10 +164,17 @@ top_artists$artists <- factor(top_artists$artists, levels = top_artists$artists[
 
 ggplot(top_artists, aes(x = artists, y = n_apperance)) +
     geom_bar(stat = "identity",  fill = "tomato2", width = 0.6 ) + 
-    labs(title = "Top Artists on our desert island", x = "Artists", y = "Number of apperances on the desert playlist") +
+    labs(title = "Top artists on our desert island", x = "Artists", y = "Number of apperances on the desert playlist") +
     theme(plot.title = element_text(size=15,hjust=-.3,face = "bold"), axis.title = element_text(size=12)) +
     geom_text(aes(label=n_apperance), hjust = 2, size = 3, color = 'white') +
     coord_flip()
+```
+Although some of this is related to people submitting multiple, of the 132 songs, there is a wide variety of artists in the most frequent songs. Classics, jazz, and pop all populate our most selected pieces. The recording times also vary widly, ranging from 1961 to june of this year, although as a whole the median is decently close to present. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+spotify_data$track.album.release_date <- as.Date(spotify_data$track.album.release_date)
+
+summary(spotify_data$track.album.release_date)
 ```
 
 
