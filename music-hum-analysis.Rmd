@@ -20,7 +20,6 @@ library(ggridges)
 
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
-
 my_id <- ''
 
 Sys.setenv(SPOTIFY_CLIENT_ID = '')
@@ -39,7 +38,7 @@ Spotify music provides an incredible API that has a wealth of information relate
 - Properties: Loudness, Speechiness, Instrumentalness
 - Context: Liveness, Acousticness
 
-Valence is a particularly fun and relavent feature for our class. Valence is musical positiveness conveyed by a track. Tracks with high valence sound more positive (happy, cheerful, euphoric), while tracks with low valence sound more negative (sad, depressed, angry). In a sense, Spotify is trying to deduce the affect of the song mathematically and giving that affect a number and continuom to exist on. 
+Valence is a particularly fun and relavent feature for our class. Valence is musical positiveness conveyed by a track. Tracks with high valence sound more positive (happy, cheerful, euphoric), while tracks with low valence sound more negative (sad, depressed, angry). In a sense, Spotify is trying to deduce the affect of the song mathematically and giving that affect a number and continuum to exist on. 
 
 However, these characteristics aren't always as black and white as they mean seem. Having a number between 0 and 1 for each characteristic seems definitive, and yet they are not obvious. One inherent problem with larger works is the difficulty have having one number, an average, describe an entire movement. 
 
@@ -58,9 +57,6 @@ berlioz %>%
 
 ```
 The fourth movement, a quick and almost chaotic at times march is described by spotify as without liveness. At the same time, it is listed as more dancable than the second movement, a ball. It shows some of the shortcomings of specific and narrow analytics broadly applied to something as varied as music. Especially when the tracks are long and varied like syphonic works, it seems that the number will be muddled by the different pieces. 
-
-
-
 
 In our scenario, the easiest way to pull the characteristics is to use the individual playlist identifiers. If this analysis wishes to be repeated, the playlists should be publicly availabe:
 
@@ -403,7 +399,7 @@ labs(title = "Valence across the 'masters'")
 
 Interestingly, at least according to Spotify, of the great artists we studied more than 2 tracks of, it appears they are all rather gloomy and negative. Overall, their tracks are more sad and angry compared to happy. This is with the notable except of Mozart. In review, it seems to be reasonable for most of the pieces such as Beethoven's 5th or even L'Orfeo. This graph looks similar as well to the overview of the energy in various pieces. 
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 ggplot(
     multiple_masters, 
     aes(x = energy, y = artists)
@@ -416,7 +412,7 @@ labs(title = "Energy across the different masterpieces")
 ```
 In this case, the statistics do a better job of showing Stravinsky as an outlier with a lot more comparitive energy. However, it is still interesting that the remaining works all score relatively low on energy. 
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 ggplot(
     multiple_masters, 
     aes(x = track.popularity, y = artists)
@@ -432,7 +428,7 @@ A rather ironic similarity between the "master's" that we have studied is that a
 
 
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 ggplot(
     multiple_masters, 
     aes(x = tempo, y = artists)
@@ -444,10 +440,7 @@ labs(title = "Wide range in tempos in masterpieces")
 
 ```
 
-Also, it is good to know that almost any tempo is sufficient for writing a masterpiece. In fact, not only any tempo, but this shows that it requires a wide range of tempos 
-
-
-
+Also, it is good to know that almost any tempo is sufficient for writing a masterpiece. In fact, not only any tempo, but this shows that it requires a wide range of tempos. Maybe the one unique feature would be that these master composers are just that, a master at a much larger variety of musical techniques and the combination of those is what makes their pieces flourish. Of course, the Spotify API is not yet equiped to determine that. 
 
 
 Finally, the features of each song were also not indicative or predictive of other features of the song. For example, using regression, it was difficult to get any significant coefficients. Even more simple features like time seem to be independent of the others, even traits like energy or liveness.
@@ -462,9 +455,20 @@ summary(lm)
 ```
 
 
-
 ## Conclusion
 
 In summary, there are not particularly defining features of what makes a masterpiece at least as presented through the Spotify API. Classical music and much of what we studied is slightly skewed in terms of modern analytics that look at loudness for example, but it doesn't have a very clear set of prerequisite features. This seems to fit in with our class's final discussion. Part of the greatness of the individual composers were there unique sense of expression and how they pushed the limitations of forms and styles available to them. It also shows that there is certainly more than one physical way to express yourself. 
 
 As for our desert island playlist, it shows what we already know - Columbia students are diverse in their backgrounds and this extends to our music choices. There is no set defining characteristic that can easily identify a song that will be loved by our undergraduate. Overall, what makes a masterpiece impactful and emotive may very well be individual. 
+
+
+### Coding References 
+
+My code and project file can be found in completeness here: https://github.com/noahlove/music-hum-data
+
+
+Spotify API: https://developer.spotify.com/documentation/web-api/
+
+Spotify R Package: https://github.com/charlie86/spotifyr
+
+Kaggle Project Example with graphs repurposed: https://www.kaggle.com/cihanoklap/top-songs-on-spotify-what-makes-them-popular
