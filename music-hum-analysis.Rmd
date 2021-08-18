@@ -379,6 +379,7 @@ spotify_data_masterpieces <- spotify_data_masterpieces %>%
 
 ```
 
+While it appears there is little that unites the students of Columbia in their music choice, that isn't necessarily surprising. As we have explored, there are a variety of reasons for music choices and there is certainly not one correct choice. However, this seems different from the "masterpieces" of the western canon. If there truly is a canon, then it would seem reasonable that there are some consistent common threads. 
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
@@ -398,5 +399,55 @@ labs(title = "Valence across the 'masters'")
 ```
 
 
+```{r}
+ggplot(
+    multiple_masters, 
+    aes(x = track.popularity, y = artists)
+    ) + 
+  geom_density_ridges_gradient(show.legend = FALSE) +
+geom_density_ridges() + 
+theme_ridges() +
+labs(title = "How popular are the Western Masters?")
+
+```
 
 
+```{r}
+ggplot(
+    multiple_masters, 
+    aes(x = energy, y = artists)
+    ) + 
+  geom_density_ridges_gradient(show.legend = FALSE) +
+geom_density_ridges() + 
+theme_ridges() +
+labs(title = "Energy across the different masterpieces")
+
+```
+
+
+
+```{r}
+ggplot(
+    multiple_masters, 
+    aes(x = tempo, y = artists)
+    ) + 
+  geom_density_ridges_gradient(show.legend = FALSE) +
+geom_density_ridges() + 
+theme_ridges() +
+labs(title = "Wide range in tempos in masterpieces")
+
+```
+
+
+
+```{r}
+ggplot(
+    multiple_masters, 
+    aes(x = danceability, y = artists)
+    ) + 
+  geom_density_ridges_gradient(show.legend = FALSE) +
+geom_density_ridges() + 
+theme_ridges() +
+labs(title = "Danceability of the classics")
+
+```
