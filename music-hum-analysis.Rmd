@@ -1,5 +1,5 @@
 ---
-title: "Analysis-music-hum"
+title: "What Factors Make a Masterpiece?"
 author: "Noah Love"
 date: "8/16/2021"
 output: html_document
@@ -18,11 +18,21 @@ library(ggridges)
 
 ```
 
-## R Markdown
+## Introduction
+Throughout our semester in Masterpieces of Western Music, we studied a variety of pieces and composers, and yet haven't arrived at a definitive set of characteristics that compose an individual masterpiece. Further, we compiled our own personal favorite songs, a playlist fit for if Manhattan was set adrift into the ocean and Columbia students alone chose the music we must survive on. 
 
-Hello this is a test
+### Spotify Data Analysis 
+Spotify music provides an incredible API that has a wealth of information related to each and every song in their repository. Spotify themselves do the hard work of data processing individual characteristics like time signature and qualitative descriptors like loudness, instrumentalness or acousticness. There are broadly speaking 3 categories of factors:
 
-```{r include=FALSE}
+- Mood: Danceability, Valence, Energy, Tempo
+- Properties: Loudness, Speechiness, Instrumentalness
+- Context: Liveness, Acousticness
+
+
+
+
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
 
 my_id <- ''
 
@@ -32,6 +42,13 @@ Sys.setenv(SPOTIFY_CLIENT_SECRET = '')
 access_token <- get_spotify_access_token()
 ```
 
+In our scenario, the easiest way to pull the characteristics is to use the individual playlist identifiers. 
+
+Columbia's desert playlist: 63HV8Y11tj4Yq8vj8TYpLm
+
+Our masterpieces: 46l09Vietu0U65GEyyWH1g
+
+They can be easily called using:
 
 ```{r}
 desert_island <- get_playlist(
@@ -40,11 +57,11 @@ desert_island <- get_playlist(
 )
 ```
 
-```{r}
+```{r include=FALSE}
 tracks <- desert_island$tracks
 ```
 
-```{r find track ids, echo=FALSE, message=FALSE, warning=FALSE}
+```{r find track ids, echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 larger_frame <- desert_island[13]
 
 test <- larger_frame[1]$tracks
@@ -56,7 +73,7 @@ tracks <- df$track.id
 tracksMatrix <- as.matrix(tracks)
 ```
 
-```{r get song information, message=FALSE, warning=FALSE}
+```{r get song information, message=FALSE, warning=FALSE, include=FALSE}
 more_info_list <- larger_frame$tracks
 
 more_info <- as_tibble(more_info_list$items)
@@ -68,7 +85,7 @@ larger_frame_important <- more_info %>%
 
 
 
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, include=FALSE}
 
 track_features <- get_track_audio_features("7t86fVeDAd63ThaR0ZkxXS")
 #track_features2 <- get_track_audio_analysis("79MMMdYL00iwKVHBSAUkLY")
@@ -87,15 +104,15 @@ for(i in 1:length(tracks)){
 spotify_data_half <- do.call(rbind, datalist)
 ```
 
-```{r}
-spotify_data_half
+```{r include=FALSE}
+
 # rename the song characteristics column to match larger set
 spotify_data_half <- spotify_data_half %>% 
     relocate(id) %>% 
     dplyr::rename(track.id = id)
 ```
 
-```{r}
+```{r include=FALSE}
 #merge the two smaller sets
 spotify_data <- full_join(spotify_data_half, larger_frame_important, by = "track.id")
 
@@ -103,7 +120,7 @@ spotify_data <- full_join(spotify_data_half, larger_frame_important, by = "track
 
 
 
-```{r make artists tibble, message=FALSE, warning=FALSE}
+```{r make artists tibble desert, message=FALSE, warning=FALSE, include=FALSE}
 # initialize artists column
 spotify_data <- spotify_data %>% 
      add_column(artists = "NAME")
@@ -123,16 +140,19 @@ for(i in 1:length(spotify_data$track.artists)){
 
 ```
 
-```{r add artists in and clean data frame}
+```{r add artists in and clean data frame, include=FALSE}
 spotify_data <- spotify_data %>% 
     select(-type, -uri, -track_href, -analysis_url, -track.artists) %>% 
     relocate(track.name)
     
+head(spotify_data)
+
+glimpse(spotify_data)
 ```
 
 
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 # https://www.kaggle.com/cihanoklap/top-songs-on-spotify-what-makes-them-popular
 top_artists <- spotify_data %>%
     group_by(artists)  %>%
@@ -151,14 +171,10 @@ ggplot(top_artists, aes(x = artists, y = n_apperance)) +
 ```
 
 
-```{r}
-
-
-spotify_data
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 spotify_data_num <- spotify_data[,-c((1:2),(17:19),(21))] 
  
-spotify_data_num
 
 mtCor <- cor(spotify_data_num)
 corrplot(mtCor, method = "ellipse", type = "upper", tl.srt = 45)
@@ -169,7 +185,7 @@ Energy and loudness is strongly correlated. Acousticness and instrumentalness ar
 
 Interestingly, popularity (to all spotify listeners) is not very correlated with anything except loudness, and negatively to acousticness. It appears we like large, grand sounds. 
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 # https://www.kaggle.com/cihanoklap/top-songs-on-spotify-what-makes-them-popular
 
@@ -194,7 +210,7 @@ ggplot(song_keys, aes(x = reorder(key,-n_key), y = n_key, fill = reorder(key,-n_
 
 
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 # https://www.kaggle.com/cihanoklap/top-songs-on-spotify-what-makes-them-popular
 correlated_density <- ggplot(spotify_data) +
@@ -215,7 +231,7 @@ correlated_density
 
 
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 # https://www.kaggle.com/cihanoklap/top-songs-on-spotify-what-makes-them-popular
 
@@ -244,12 +260,11 @@ Presto – very, very fast (168–200 bpm)
 
 
 
-```{r}
+```{r message=FALSE, warning=FALSE, include=FALSE}
 joy <- get_artist_audio_features('Hector Berlioz')
-joy
 ```
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 # Symphonie fantastique, Op. 14, H. 48: I. Rêveries - Passions	
 # Symphonie fantastique, Op. 14, H. 48: II. Un bal	
 # Symphonie fantastique, Op. 14, H. 48: III. Scène aux champs	
@@ -296,28 +311,9 @@ berlioz %>%
 
 
 
-
-```{r}
-ggplot(berlioz, aes(x = energy,y=fct_rev(track_name))) + 
-  geom_density_ridges(scale = 2, size = 0.1, rel_min_height = 0.03,quantile_lines=TRUE,quantiles=2) +
-  theme_ridges()+
-  scale_x_continuous( expand = c(0, 0)) +
-  labs(title= "Foo Fighters energy by album",subtitle = "Based on data from Spotify", y="Album", x = "Energy")
-```
-
-```{r}
-ggplot(
-    berlioz, 
-    aes(x = liveness, y = track_name)
-    ) + 
-geom_density_ridges() + 
-theme_ridges() +
-labs(title = "Joyplot of Joy Division's joy distributions")
-```
-
 ## What makes a master 
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 masterpieces <- get_playlist(
     playlist_id = "46l09Vietu0U65GEyyWH1g",
     authorization = access_token
@@ -340,12 +336,11 @@ more_info_masterpieces <- as_tibble(more_info_list_masterpieces$items)
 larger_frame_important_masterpieces <- more_info_masterpieces %>% 
     select(track.id, track.artists, track.duration_ms, track.explicit, track.name, track.album.name, track.album.release_date, track.popularity)
 
-larger_frame_important_masterpieces
 ```
 
 
 
-```{r message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 track_features_masterpieces <- get_track_audio_features("4yg4OeZxDSqyXx6NUxtxHR")
 
 i <- 0
@@ -373,7 +368,7 @@ spotify_data_masterpieces <- full_join(spotify_data_half_masterpieces, larger_fr
 ```
 
 
-```{r make artists tibble, message=FALSE, warning=FALSE}
+```{r make artists tibble masterpieces, echo=FALSE, message=FALSE, warning=FALSE}
 # initialize artists column
 spotify_data_masterpieces <- spotify_data_masterpieces %>% 
      add_column(artists = "NAME")
@@ -395,13 +390,11 @@ spotify_data_masterpieces <- spotify_data_masterpieces %>%
     select(-type, -uri, -track_href, -analysis_url, -track.artists) %>% 
     relocate(track.name)
 
-spotify_data_masterpieces
-    
 ```
 
 
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 multiple_masters <- spotify_data_masterpieces %>% 
   group_by(artists) %>% 
   filter(n()>1)
@@ -416,6 +409,7 @@ theme_ridges() +
 labs(title = "Valence across the 'masters'")
 
 ```
+
 
 
 
