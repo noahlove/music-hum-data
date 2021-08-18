@@ -257,7 +257,7 @@ ggplot(song_keys, aes(x = reorder(key,-n_key), y = n_key, fill = reorder(key,-n_
     theme(legend.position="none")
 ```
 
-
+Over our desert island playlist, there is a suprising amount of normality to be seen within our 132 samples. Danceability, energy and valence all form rather normal curves and it appears that there is a good zone for making a piece that Columbia students like. That, or maybe we can even extrapolate that we are relatively normal (and don't all listen to hard metal or something at the extreme). 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -297,8 +297,6 @@ joy <- get_artist_audio_features('Hector Berlioz')
 berlioz <- joy %>% 
   filter(album_release_date == "2021-07-23")
 
-berlioz
-
 berlioz %>% 
     arrange(-valence) %>% 
     select(.data$track_name, .data$valence) %>% 
@@ -332,9 +330,7 @@ berlioz %>%
 ```
 
 
-
-
-## What makes a master 
+## What makes a masterpiece
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 masterpieces <- get_playlist(
