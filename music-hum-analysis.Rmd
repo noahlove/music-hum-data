@@ -44,7 +44,7 @@ However, these characteristics aren't always as black and white as they mean see
 
 For example, we can look at Hector Berlioz's Symphonie Fantastique
 
-```{r message=FALSE, warning=FALSE, include=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 joy <- get_artist_audio_features('Hector Berlioz')
 
 berlioz <- joy %>% 
@@ -56,7 +56,7 @@ berlioz %>%
     kable()
 
 ```
-For example, the fourth movement, a quick and almost chaotic at times march is almost without liveliness but is listed as more dancable than the second movement, a ball. It shows some of the shortcomings of the analytics, especially as they relate to larger symphonic works. 
+The fourth movement, a quick and almost chaotic at times march is described by spotify as without liveness. At the same time, it is listed as more dancable than the second movement, a ball. It shows some of the shortcomings of specific and narrow analytics broadly applied to something as varied as music. Especially when the tracks are long and varied like syphonic works, it seems that the number will be muddled by the different pieces. 
 
 
 
