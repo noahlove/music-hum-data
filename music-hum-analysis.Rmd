@@ -190,7 +190,7 @@ corrplot(mtCor, method = "ellipse", type = "upper", tl.srt = 45)
 
 Energy and loudness is strongly correlated. Acousticness and instrumentalness are strongly negatively correlated with energy and loudness. This seems reasonable as there is very infrequently really loud instrumental or acappella songs. 
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 spotify_data %>% 
   arrange(-acousticness) %>% 
   select(track.name, acousticness) %>% 
@@ -200,7 +200,39 @@ spotify_data %>%
 ```
 Particularly pulled out in this "acousticness" are piano pieces. At the top is Debussy in a rather slow and tender Prelude. 
 
-Interestingly, popularity (to all spotify listeners) is not very correlated with anything except loudness, and negatively to acousticness. It appears we like large, grand sounds. 
+Interestingly, popularity (to all spotify listeners) is not very correlated with anything except loudness, and negatively to acousticness. It appears we like large, grand sounds. In fact, the majority of our playlist skews towards loudness. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# https://www.kaggle.com/cihanoklap/top-songs-on-spotify-what-makes-them-popular
+
+loudness_density <- ggplot(spotify_data) +
+    geom_density(aes(loudness, fill ="loudness")) + 
+    scale_x_continuous(name = "Loudness") +
+    scale_y_continuous(name = "Density") +
+    ggtitle("Density plot of Loudness") +
+    theme_bw() +
+    theme(plot.title = element_text(size = 14, face = "bold"),
+            text = element_text(size = 12)) +
+    theme(legend.title=element_blank()) +
+    scale_fill_brewer(palette="Paired")
+
+print(loudness_density)
+```
+
+
+However, popularity and loudness are innevitably skewed towards more modern songs that have a larger listening audience. This is indeed true even for our playlist, as the top four songs for popularity have come out in the last four years.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+spotify_data %>% 
+  arrange(-track.popularity) %>% 
+  select(track.name, track.popularity, artists, track.album.release_date) %>% 
+  head(4) %>% 
+  kable() 
+
+
+```
+
+Although I am not able to personally derive meaning from the distribution of keys, I found it interest gradual choice and wide variety of keys. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -248,32 +280,6 @@ correlated_density
 
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-
-# https://www.kaggle.com/cihanoklap/top-songs-on-spotify-what-makes-them-popular
-
-
-loudness_density <- ggplot(spotify_data) +
-    geom_density(aes(loudness, fill ="loudness")) + 
-    scale_x_continuous(name = "Loudness") +
-    scale_y_continuous(name = "Density") +
-    ggtitle("Density plot of Loudness") +
-    theme_bw() +
-    theme(plot.title = element_text(size = 14, face = "bold"),
-            text = element_text(size = 12)) +
-    theme(legend.title=element_blank()) +
-    scale_fill_brewer(palette="Paired")
-
-print(loudness_density)
-```
-
-
-Adagio – slowly with great expression[10] (66–76 bpm)
-Andante – at a walking pace (76–108 bpm)
-Moderato – at a moderate speed (108–120 bpm)
-Allegro – fast, quickly, and bright (120–156 bpm)
-Vivace – lively and fast (156–176 bpm)
-Presto – very, very fast (168–200 bpm)
 
 
 
