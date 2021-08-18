@@ -187,6 +187,8 @@ ggplot(top_artists, aes(x = artists, y = n_apperance)) +
     geom_text(aes(label=n_apperance), hjust = 2, size = 3, color = 'white') +
     coord_flip()
 ```
+
+
 Although some of this is related to people submitting multiple, of the 132 songs, there is a wide variety of artists in the most frequent songs. Classics, jazz, and pop all populate our most selected pieces. The recording times also vary widly, ranging from 1961 to june of this year, although as a whole the median is decently close to present. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
@@ -451,3 +453,19 @@ theme_ridges() +
 labs(title = "Danceability of the classics")
 
 ```
+
+
+Finally, the features of each song were also not indicative or predictive of other features of the song. For example, using regression, it was difficult to get any significant coefficients. Even more simple features like time seem to be independent of the others, even traits like energy or liveness.
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+lm <- lm(data = spotify_data_masterpieces, tempo ~ danceability + energy + loudness + speechiness + acousticness + instrumentalness + liveness + valence)
+
+summary(lm)
+```
+
+
+
+
